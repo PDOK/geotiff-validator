@@ -43,7 +43,7 @@ def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
     if image_structure is not None:
         interleave = image_structure["INTERLEAVE"]
         if image_structure.get("LAYOUT") == "COG":
-            cog_enabled = true
+            cog_enabled = True
         compression = image_structure.get("COMPRESSION")
 
     return SharedTifAttributes(cog_enabled, compression, interleave, gdal_info["size"][0], gdal_info["size"][1], crs, data_type)
