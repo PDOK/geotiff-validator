@@ -1,3 +1,5 @@
+from typing import Iterable, List, Dict
+from abc import ABC, abstractmethod
 
 def format_result(
         validation_code: str,
@@ -17,15 +19,17 @@ class Validator:
     def __init__(self, dataset, **kwargs):
         self.dataset: gdal.Dataset = dataset
 
-    def validate(self) -> Dict[str, List[str]]:
+    def validate(self) -> Dict[str, List[str]] | None:
         """Run validation at geopackage."""
         results = list(self.check())
         if results:
             return format_result(
-                validation_code=self.validation_code,
+                validation_code=self.code,
                 validation_description=self.__doc__,
                 trace=results,
             )
+        else:
+            return None
 
     @abstractmethod
     def check(self) -> Iterable[str]:

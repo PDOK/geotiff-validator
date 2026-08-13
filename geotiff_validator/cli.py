@@ -106,6 +106,8 @@ def geotiff_validator_command(
         definitions_path: str,
         exit_on_fail: bool
 ):
+    gdal.UseExceptions()
+
     if (geotiff_path is None and folder_path is None) or (geotiff_path is not None and folder_path is not None):
         logger.error("Give exactly one of --geotiff-path and --folder-path")
         sys.exit(1)
@@ -138,12 +140,28 @@ def geotiff_validator_command(
         allow_dash=False,
     ),
 )
+@click.option(
+    "--geotiff-path",
+    envvar="GEOTIFF_PATH",
+    show_envvar=True,
+    required=False,
+    default=None,
+    help="Path pointing to the geotiff .tif file",
+    type=click.types.Path(
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        writable=False,
+        allow_dash=False,
+    ),
+)
 def geotiff_generate_definitions_command(
+        geotiff_path: str,
         folder_path: str
 ):
     gdal.UseExceptions()
 
-    definitions = generate_definitions(folder_path)
+    definitions = generate_definitions(geotiff_path, folder_path)
     json_string = json.dumps(definitions, indent=2)
     print(json_string)
 

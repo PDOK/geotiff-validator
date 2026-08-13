@@ -6,6 +6,8 @@ import json
 import sys
 import typing
 
+from geotiff_validator.geotiff import geotiff_header_is_cog, get_geotiff_interleave, get_geotiff_compression
+
 class SharedTifAttributes:
     cog_enabled: bool
     cog_block_size_x: typing.Optional[int]
@@ -17,7 +19,7 @@ class SharedTifAttributes:
     crs: int
     data_type: str
 
-    def __init__(self, cog_enabled: bool, compression: typing.Optional[str], interleave: str, size_x: int, size_y: int, crs: str, data_type: str, cog_block_size_x: typing.Optional[int], cog_block_size_y: typing.Optional[int]):
+    def __init__(self, cog_enabled: bool, compression: typing.Optional[str], interleave: str, size_x: int, size_y: int, crs: int, data_type: str, cog_block_size_x: typing.Optional[int], cog_block_size_y: typing.Optional[int]):
         self.cog_enabled = cog_enabled
         self.compression = compression
         self.interleave = interleave
@@ -38,9 +40,9 @@ def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
     stac = gdal_info["stac"]
     metadata = gdal_info["metadata"]
 
-    interleave = ""
-    cog_enabled = False
-    compression = None
+    interleave = get_geotiff_interleave(gdal_info)
+    cog_enabled = geotiff_header_is_cog(gdal_info)
+    compression = get_geotiff_compression(gdal_info)
     crs = stac["proj:epsg"]
     data_type = stac["raster:bands"][0]["data_type"] # This should probably be checked conditionally
     cog_block_size_x = None
@@ -48,34 +50,41 @@ def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
 
     image_structure = metadata.get("IMAGE_STRUCTURE")
     if image_structure is not None:
-        interleave = image_structure["INTERLEAVE"]
         if image_structure.get("LAYOUT") == "COG":
-            cog_enabled = True
             cog_block_size_x = gdal_info["bands"][0]["block"][0]
             cog_block_size_y = gdal_info["bands"][0]["block"][1]
-        compression = image_structure.get("COMPRESSION")
 
     return SharedTifAttributes(cog_enabled, compression, interleave, gdal_info["size"][0], gdal_info["size"][1], crs, data_type, cog_block_size_x, cog_block_size_y)
 
-def get_shared_attributes(folder: str, dir_list: typing.List[str]):
-    for file in dir_list:
-        if file.endswith(".tif"):
-            full_path = folder + "/" + file
-            ds = None
-            try:
-                ds = gdal.Open(full_path)
-            except:
-                print(f"Could not parse header from file '{full_path}'")
-                sys.exit(1)
-            header_info = gdal.Info(ds, format='json', showColorTable=False)
-            return from_gdal_info(header_info)
+def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[str]):
+    if file is not None:
+        ds = None
+        try:
+            ds = gdal.Open(file)
+        except:
+            print(f"Could not parse header from file '{file}'")
+            sys.exit(1)
+        header_info = gdal.Info(ds, format='json', showColorTable=False)
+        return from_gdal_info(header_info)
+    else:
+        for file in dir_list:
+            if file.endswith(".tif"):
+                full_path = folder + "/" + file
+                ds = None
+                try:
+                    ds = gdal.Open(full_path)
+                except:
+                    print(f"Could not parse header from file '{full_path}'")
+                    sys.exit(1)
+                header_info = gdal.Info(ds, format='json', showColorTable=False)
+                return from_gdal_info(header_info)
     return None
 
-def generate_definitions(folder: str):
+def generate_definitions(file:str, folder: str):
     result = {}
 
     dir_list = listdir(folder)
-    shared_attributes = get_shared_attributes(folder, dir_list)
+    shared_attributes = get_shared_attributes(file, folder, dir_list)
     if shared_attributes is None:
         print("Could not find any tif file in folder")
         sys.exit(1)
