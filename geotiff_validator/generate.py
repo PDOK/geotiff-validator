@@ -6,7 +6,9 @@ import json
 import sys
 import typing
 
-from geotiff_validator.geotiff import geotiff_header_is_cog, get_geotiff_interleave, get_geotiff_compression
+from geotiff_validator.geotiff import geotiff_is_cog, get_geotiff_interleave, get_geotiff_compression, \
+    get_geotiff_cog_block_dimensions, get_geotiff_data_type, get_geotiff_dimensions, get_geotiff_crs
+
 
 class SharedTifAttributes:
     cog_enabled: bool
@@ -37,24 +39,15 @@ class SharedTifAttributes:
                 and self.cog_block_size_x == other.cog_block_size_x and self.cog_block_size_y == other.cog_block_size_y)
 
 def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
-    stac = gdal_info["stac"]
-    metadata = gdal_info["metadata"]
-
+    dimensions = get_geotiff_dimensions(gdal_info)
     interleave = get_geotiff_interleave(gdal_info)
-    cog_enabled = geotiff_header_is_cog(gdal_info)
+    cog_enabled = geotiff_is_cog(gdal_info)
     compression = get_geotiff_compression(gdal_info)
-    crs = stac["proj:epsg"]
-    data_type = stac["raster:bands"][0]["data_type"] # This should probably be checked conditionally
-    cog_block_size_x = None
-    cog_block_size_y = None
+    crs = get_geotiff_crs(gdal_info)
+    data_type = get_geotiff_data_type(gdal_info)
+    cog_block_size = get_geotiff_cog_block_dimensions(gdal_info)
 
-    image_structure = metadata.get("IMAGE_STRUCTURE")
-    if image_structure is not None:
-        if image_structure.get("LAYOUT") == "COG":
-            cog_block_size_x = gdal_info["bands"][0]["block"][0]
-            cog_block_size_y = gdal_info["bands"][0]["block"][1]
-
-    return SharedTifAttributes(cog_enabled, compression, interleave, gdal_info["size"][0], gdal_info["size"][1], crs, data_type, cog_block_size_x, cog_block_size_y)
+    return SharedTifAttributes(cog_enabled, compression, interleave, dimensions[0], dimensions[1], crs, data_type, cog_block_size[0], cog_block_size[1])
 
 def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[str]):
     if file is not None:

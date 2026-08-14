@@ -1,3 +1,4 @@
+from geotiff_validator.geotiff import geotiff_is_cog
 from geotiff_validator.validations import validator
 
 from typing import Iterable
@@ -9,8 +10,8 @@ class CogValidator(validator.Validator):
     message = "Geotiff is not a Cloud Optimized GeoTIFF(COG)"
 
     def check(self) -> Iterable[str]:
-        header_info = gdal.Info(self.dataset, format='json', showColorTable=False)
-
-        return ["Not cog"]
-
-
+        is_cog = geotiff_is_cog(self.dataset_header_info)
+        if not is_cog:
+            return [CogValidator.message]
+        else:
+            return []

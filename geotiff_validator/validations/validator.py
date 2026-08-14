@@ -1,5 +1,6 @@
 from typing import Iterable, List, Dict
 from abc import ABC, abstractmethod
+from osgeo import gdal
 
 def format_result(
         validation_code: str,
@@ -16,8 +17,9 @@ class Validator:
     code: int
     message: str
 
-    def __init__(self, dataset, **kwargs):
+    def __init__(self, dataset, dataset_header_info, **kwargs):
         self.dataset: gdal.Dataset = dataset
+        self.dataset_header_info = dataset_header_info
 
     def validate(self) -> Dict[str, List[str]] | None:
         """Run validation at geopackage."""
