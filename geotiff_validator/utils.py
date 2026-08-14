@@ -5,7 +5,6 @@ def open_dataset(filename: str) -> gdal.Dataset:
     try:
         dataset = gdal.Open(filename)
     except Exception as e:
-        print(e)
-        #error_handler(gdal.CE_Failure, 0, e.args[0])
+        return None, e
 
-    return dataset
+    return dataset, None

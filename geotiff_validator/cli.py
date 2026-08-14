@@ -4,11 +4,14 @@ import sys
 import click
 import click_log
 import json
+import time
 
 from osgeo import gdal
 from geotiff_validator.generate import generate_definitions
 from geotiff_validator import validate
 from geotiff_validator import output
+
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 click_log.basic_config(logger)
@@ -107,13 +110,27 @@ def geotiff_validator_command(
         definitions_path: str,
         exit_on_fail: bool
 ):
+    start_time = datetime.now()
+    duration_start = time.monotonic()
+
     gdal.UseExceptions()
 
     if (geotiff_path is None and folder_path is None) or (geotiff_path is not None and folder_path is not None):
         logger.error("Give exactly one of --geotiff-path and --folder-path")
         sys.exit(1)
 
-    validate.validate(geotiff_path, folder_path, required_validations, recommended_validations)
+    validations, required_validators, recommended_validators, success = validate.validate(geotiff_path, folder_path, required_validations, recommended_validations)
+
+    duration_seconds = time.monotonic() - duration_start
+
+    output.log_output(
+        results=validations,
+        success=success,
+        start_time=start_time,
+        duration_seconds=duration_seconds,
+        required_validations_executed=[x.code for x in required_validators],
+        recommended_validations_executed=[x.code for x in recommended_validators]
+    )
 
     success = True
     if not success and exit_on_fail:
@@ -184,7 +201,7 @@ def geotiff_generate_definitions_command(
     help="Output yaml",
 )
 @click_log.simple_verbosity_option(logger)
-def geopackage_validator_command_show_validations(no_legacy, yaml):
+def geotiff_validator_command_show_validations(no_legacy, yaml):
     try:
         legacy = not no_legacy
         validation_codes = validate.get_validation_descriptions(legacy)
