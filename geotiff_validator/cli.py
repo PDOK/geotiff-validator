@@ -8,6 +8,7 @@ import json
 from osgeo import gdal
 from geotiff_validator.generate import generate_definitions
 from geotiff_validator import validate
+from geotiff_validator import output
 
 logger = logging.getLogger(__name__)
 click_log.basic_config(logger)
@@ -112,7 +113,7 @@ def geotiff_validator_command(
         logger.error("Give exactly one of --geotiff-path and --folder-path")
         sys.exit(1)
 
-    validate.validate(geotiff_path, folder_path)
+    validate.validate(geotiff_path, folder_path, required_validations, recommended_validations)
 
     success = True
     if not success and exit_on_fail:
@@ -164,6 +165,33 @@ def geotiff_generate_definitions_command(
     definitions = generate_definitions(geotiff_path, folder_path)
     json_string = json.dumps(definitions, indent=2)
     print(json_string)
+
+
+@cli.command(
+    name="show-validations",
+    help="Show all the possible validations that can be executed in the validate command.",
+)
+@click.option(
+    "--no-legacy",
+    required=False,
+    is_flag=True,
+    help="Output without Legacy checks",
+)
+@click.option(
+    "--yaml",
+    required=False,
+    is_flag=True,
+    help="Output yaml",
+)
+@click_log.simple_verbosity_option(logger)
+def geopackage_validator_command_show_validations(no_legacy, yaml):
+    try:
+        legacy = not no_legacy
+        validation_codes = validate.get_validation_descriptions(legacy)
+        output.print_output(validation_codes, yaml, yaml_indent=5)
+    except Exception:
+        logger.exception("Error while listing validations")
+        sys.exit(1)
 
 if __name__ == "__main__":
     cli()

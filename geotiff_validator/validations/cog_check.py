@@ -2,9 +2,9 @@ from geotiff_validator.geotiff import geotiff_is_cog
 from geotiff_validator.validations import validator
 
 from typing import Iterable
-from osgeo import gdal
 
 class CogValidator(validator.Validator):
+    """The GeoTiff must be a Cloud Optimized GeoTiff(COG)"""
 
     code = 1
     message = "Geotiff is not a Cloud Optimized GeoTIFF(COG)"
