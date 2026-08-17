@@ -10,6 +10,8 @@ from geotiff_validator import validations as validation
 from geotiff_validator import validations
 from geotiff_validator.validations.validator import format_result
 
+from typing import Dict, List
+
 
 def get_validations_for_validating_process(required_validations: str, recommended_validations: str) -> (list, list):
     required_validators = []
@@ -86,7 +88,7 @@ def validate(geotiff_path, folder_path, required_validations: str="", recommende
         # folder_path must be not None
         dir_list = listdir(folder_path)
         for filename in dir_list:
-            if filename.endswith(".tif"):
+            if utils.file_has_tiff_extension(filename):
                 file_path = folder_path
                 if not file_path.endswith("/"):
                     file_path += "/"

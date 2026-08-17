@@ -8,7 +8,9 @@ import typing
 
 from geotiff_validator.geotiff import geotiff_is_cog, get_geotiff_interleave, get_geotiff_compression, \
     get_geotiff_cog_block_dimensions, get_geotiff_data_type, get_geotiff_dimensions, get_geotiff_crs
+from geotiff_validator.utils import file_has_tiff_extension
 
+from typing import Dict, List
 
 class SharedTifAttributes:
     cog_enabled: bool
@@ -61,7 +63,7 @@ def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[st
         return from_gdal_info(header_info)
     else:
         for file in dir_list:
-            if file.endswith(".tif"):
+            if file_has_tiff_extension(file):
                 full_path = folder + "/" + file
                 ds = None
                 try:
@@ -72,6 +74,22 @@ def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[st
                 header_info = gdal.Info(ds, format='json', showColorTable=False)
                 return from_gdal_info(header_info)
     return None
+
+def append_file_structure(filepath: str, file_name: str, file_structures: List[str], shared_attributes: SharedTifAttributes):
+    ds = None
+    try:
+        ds = gdal.Open(filepath)
+    except Exception:
+        print(f"Could not parse header from file '{filepath}'")
+        sys.exit(1)
+    header_info = gdal.Info(ds, format='json', showColorTable=False)
+    file_attributes = from_gdal_info(header_info)
+    if file_attributes != shared_attributes:
+        print(f"Mismatched attributes, expected {vars(shared_attributes)} but got {vars(file_attributes)}")
+        sys.exit(1)
+
+    my_struct = {"bands": header_info["bands"], "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file_name, "raster_count": ds.RasterCount }
+    file_structures.append(my_struct)
 
 def generate_definitions(file:str, folder: str):
     result = {}
@@ -94,23 +112,13 @@ def generate_definitions(file:str, folder: str):
 
     file_structures = []
 
-    for file in dir_list:
-        if file.endswith(".tif"):
-            full_path = folder + "/" + file
-            ds = None
-            try:
-                ds = gdal.Open(full_path)
-            except:
-                print(f"Could not parse header from file '{full_path}'")
-                sys.exit(1)
-            header_info = gdal.Info(ds, format='json', showColorTable=False)
-            file_attributes = from_gdal_info(header_info)
-            if file_attributes != shared_attributes:
-                print(f"Mismatched attributes, expected {vars(shared_attributes)} but got {vars(file_attributes)}")
-                sys.exit(1)
-
-            my_struct = {"bands": header_info["bands"], "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file, "raster_count": ds.RasterCount }
-            file_structures.append(my_struct)
+    if folder is not None and folder != "":
+        for file in dir_list:
+            if file_has_tiff_extension(file):
+                full_path = folder + "/" + file
+                append_file_structure(full_path, file, file_structures, shared_attributes)
+    else:
+        append_file_structure(file, file.rsplit("/", 1)[-1], file_structures, shared_attributes)
 
     result["files"] = file_structures
 
