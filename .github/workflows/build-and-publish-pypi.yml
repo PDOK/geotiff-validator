@@ -1,0 +1,68 @@
+# This workflows will upload a Python Package using Twine when a release is created
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+
+name: Upload Python Package
+
+on:
+  release:
+    types: [created]
+
+env:
+  image: pdok/geotiff-validator
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v3
+    - name: Set up Python 3.9 🐍
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+    - name: Autobump version
+      shell: bash
+      # language=bash
+      run: |
+        set -e
+        # https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+        VERSION=$(echo $GITHUB_REF | grep -oP '(?<=/)(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$')
+        PLACEHOLDER='__version__ = "0.0.0-dev"'
+        VERSION_FILE='geotiff_validator/__init__.py'
+        grep "$PLACEHOLDER" "$VERSION_FILE" || { echo 'version placeholder not found'; exit 1; }
+        sed -i "s/$PLACEHOLDER/__version__ = \"${VERSION}\"/g" "$VERSION_FILE"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine --upgrade
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        python setup.py sdist bdist_wheel
+        twine upload dist/*
+    - name: Docker meta
+      id: docker_meta
+      uses: docker/metadata-action@v3
+      with:
+        images: ${{ env.image }}
+        tags: |
+          type=semver,pattern={{version}}
+    - name: Build result notification
+      if: success() || failure()
+      uses: 8398a7/action-slack@v3
+      with:
+        fields: all
+        status: custom
+        custom_payload: |
+          {
+            attachments: [{
+              color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+              text: `${process.env.AS_WORKFLOW} ${{ job.status }} for ${process.env.AS_REPO}!\n${process.env.AS_JOB} job on ${process.env.AS_REF} (commit: ${process.env.AS_COMMIT}, version: ${{ steps.docker_meta.outputs.version }}) by ${process.env.AS_AUTHOR} took ${process.env.AS_TOOK}`,
+            }]
+          }
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
