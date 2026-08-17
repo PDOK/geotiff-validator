@@ -51,6 +51,9 @@ def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
 
     return SharedTifAttributes(cog_enabled, compression, interleave, dimensions[0], dimensions[1], crs, data_type, cog_block_size[0], cog_block_size[1])
 
+def from_generated_schema(schema: dict) -> SharedTifAttributes:
+    return SharedTifAttributes(schema["cog_enabled"], schema["compression"], schema["interleave"], schema["size_x"], schema["size_y"], schema["crs"], schema["data_type"], schema["cog_block_size_x"], schema["cog_block_size_y"])
+
 def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[str]):
     if file is not None:
         ds = None

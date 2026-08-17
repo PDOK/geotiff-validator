@@ -119,7 +119,7 @@ def geotiff_validator_command(
         logger.error("Give exactly one of --geotiff-path and --folder-path")
         sys.exit(1)
 
-    validations, required_validators, recommended_validators, success = validate.validate(geotiff_path, folder_path, required_validations, recommended_validations)
+    validations, required_validators, recommended_validators, success = validate.validate(geotiff_path, folder_path, required_validations, recommended_validations, definitions_path)
 
     duration_seconds = time.monotonic() - duration_start
 
