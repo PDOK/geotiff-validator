@@ -6,6 +6,25 @@ from geotiff_validator import __version__
 
 import yaml
 
+def represent_ordereddict(dumper, data):
+    """
+    Represent method for pyyaml.
+    Shamelessly copied from the python3 part of this answer:
+     https://stackoverflow.com/questions/16782112/can-pyyaml-dump-dict-items-in-non-alphabetical-order#answer-16782282
+    """
+    value = []
+
+    for item_key, item_value in data.items():
+        node_key = dumper.represent_data(item_key)
+        node_value = dumper.represent_data(item_value)
+
+        value.append((node_key, node_value))
+
+    return yaml.nodes.MappingNode("tag:yaml.org,2002:map", value)
+
+
+yaml.add_representer(OrderedDict, represent_ordereddict)
+
 def print_output(python_object, as_yaml, yaml_indent=2):
     if as_yaml:
         content = yaml.dump(python_object, indent=yaml_indent, sort_keys=False)

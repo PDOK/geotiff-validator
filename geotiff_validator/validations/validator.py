@@ -19,10 +19,11 @@ class Validator:
     code: int
     message: str
 
-    def __init__(self, filename:str, dataset, dataset_header_info, **kwargs):
+    def __init__(self, filename:str, dataset, dataset_header_info, schema, **kwargs):
         self.filename = filename
         self.dataset: gdal.Dataset = dataset
         self.dataset_header_info = dataset_header_info
+        self.schema = schema
 
     def validate(self) -> Dict[str, List[str]] | None:
         """Run validation on geotiff."""

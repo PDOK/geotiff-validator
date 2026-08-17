@@ -75,6 +75,9 @@ def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[st
                 return from_gdal_info(header_info)
     return None
 
+def get_file_specifics(header_info, file_name: str, dataset):
+    return {"bands": header_info["bands"], "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file_name, "raster_count": dataset.RasterCount}
+
 def append_file_structure(filepath: str, file_name: str, file_structures: List[str], shared_attributes: SharedTifAttributes):
     ds = None
     try:
@@ -88,8 +91,8 @@ def append_file_structure(filepath: str, file_name: str, file_structures: List[s
         print(f"Mismatched attributes, expected {vars(shared_attributes)} but got {vars(file_attributes)}")
         sys.exit(1)
 
-    my_struct = {"bands": header_info["bands"], "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file_name, "raster_count": ds.RasterCount }
-    file_structures.append(my_struct)
+    file_structure_dict = get_file_specifics(header_info, file_name, ds)
+    file_structures.append(file_structure_dict)
 
 def generate_definitions(file:str, folder: str):
     result = {}

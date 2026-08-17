@@ -64,13 +64,13 @@ def append_validations_for_file(file_path, validation_results, required_validato
 
     dataset_header_info = gdal.Info(dataset, format='json', showColorTable=False)
     for validator in required_validators:
-        result = validator(file_path.rsplit("/", 1)[-1], dataset, dataset_header_info).validate()
+        result = validator(file_path.rsplit("/", 1)[-1], dataset, dataset_header_info, None).validate()
         if result is not None:
             result["level"] = "error"
             success = False
             validation_results.append(result)
     for validator in recommended_validators:
-        result = validator(file_path.rsplit("/", 1)[-1], dataset, dataset_header_info).validate()
+        result = validator(file_path.rsplit("/", 1)[-1], dataset, dataset_header_info, None).validate()
         if result is not None:
             result["level"] = "recommendation"
             validation_results.append(result)
