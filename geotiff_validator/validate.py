@@ -153,8 +153,9 @@ def validate(geotiff_path, folder_path, required_validations: str, recommended_v
                 if not file_path.endswith("/"):
                     file_path += "/"
                 file_path += filename
-                success = success and append_validations_for_file(file_path, validation_results, required_validators,
-                                                                  recommended_validators, definitions)
+                file_success = append_validations_for_file(file_path, validation_results, required_validators,
+                                                           recommended_validators, definitions)
+                success = success and file_success
 
     return validation_results, required_validators, recommended_validators, success
 

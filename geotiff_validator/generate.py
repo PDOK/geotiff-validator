@@ -126,6 +126,8 @@ def generate_definitions(file:str, folder: str):
     else:
         append_file_structure(file, file.rsplit("/", 1)[-1], file_structures, shared_attributes)
 
+    file_structures.sort(key=lambda x: x["file_name"])
+
     result["files"] = file_structures
 
     return result
