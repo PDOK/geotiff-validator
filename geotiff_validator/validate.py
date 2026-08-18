@@ -60,10 +60,11 @@ def get_validations_for_validating_process(required_validations: str, recommende
 def append_validations_for_file(file_path: str, validation_results, required_validators: List[validations.Validator], recommended_validators: List[validations.Validator],
                                 definitions: dict | None):
     success = True
+    file_name = file_path.rsplit("/", 1)[-1]
     dataset, error = utils.open_dataset(file_path)
     if error is not None:
         item = format_result(
-            filename=file_path.rsplit("/", 1)[-1],
+            filename=file_name,
             validation_code=0,
             validation_description="The file must be a GeoTiff file",
             trace=["The file is not a GeoTiff file"],
@@ -73,13 +74,13 @@ def append_validations_for_file(file_path: str, validation_results, required_val
 
     dataset_header_info = gdal.Info(dataset, format='json', showColorTable=False)
     for validator in required_validators:
-        result = validator(file_path.rsplit("/", 1)[-1], dataset, dataset_header_info, definitions).validate()
+        result = validator(file_name, dataset, dataset_header_info, definitions).validate()
         if result is not None:
             result["level"] = "error"
             success = False
             validation_results.append(result)
     for validator in recommended_validators:
-        result = validator(file_path.rsplit("/", 1)[-1], dataset, dataset_header_info, definitions).validate()
+        result = validator(file_name, dataset, dataset_header_info, definitions).validate()
         if result is not None:
             result["level"] = "recommendation"
             validation_results.append(result)
@@ -97,6 +98,31 @@ def get_definitions(definitions_path: str):
 
     return None
 
+def check_expected_files(definitions, geotiff_path, folder_path, validation_results):
+    expected_files = set()
+    for file_structure in definitions["files"]:
+        expected_files.add(file_structure["file_name"])
+
+    found_files = set()
+    if geotiff_path is not None:
+        geotiff_file = geotiff_path.rsplit("/", 1)[-1]
+        found_files.add(geotiff_file)
+    else:
+        dir_list = listdir(folder_path)
+        for filename in dir_list:
+            if utils.file_has_tiff_extension(filename):
+                found_files.add(filename.rsplit("/", 1)[-1])
+
+    if found_files != expected_files:
+        missing_files = expected_files - found_files
+        extra_files = found_files - expected_files
+        if len(missing_files) > 0:
+            validation_results.append(format_result("-", SchemaValidator.code, SchemaValidator.__doc__, f"The following files were expected but missing: {missing_files}"))
+        # This check could be removed as the check also happens in the SchemaValidator itself
+        if len(extra_files) > 0:
+            validation_results.append(format_result("-", SchemaValidator.code, SchemaValidator.__doc__, f"The following files not expected but present: {extra_files}"))
+
+    return
 
 def validate(geotiff_path, folder_path, required_validations: str, recommended_validations: str, definitions_path: str):
     success = True
@@ -110,6 +136,10 @@ def validate(geotiff_path, folder_path, required_validations: str, recommended_v
                                                                                          recommended_validations,
                                                                                          definitions is not None)
     validation_results = []
+
+    # We need to validate that all files are present, this cannot be done on a file-by-file basis, so we do it separately
+    if definitions is not None:
+        check_expected_files(definitions, geotiff_path, folder_path, validation_results)
 
     if geotiff_path is not None:
         success = success and append_validations_for_file(geotiff_path, validation_results, required_validators,
