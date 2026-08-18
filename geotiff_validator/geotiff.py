@@ -25,6 +25,10 @@ def get_geotiff_crs(header: dict) -> int:
     return stac["proj:epsg"]
 
 def get_geotiff_cog_block_dimensions(header: dict) -> (int | None, int | None):
+    is_cog = geotiff_is_cog(header)
+    if not is_cog:
+        return None, None
+
     raster_bands = header.get("bands", None)
     if raster_bands is None or len(raster_bands) == 0:
         return None, None
