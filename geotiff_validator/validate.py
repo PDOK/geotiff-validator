@@ -98,7 +98,7 @@ def get_definitions(definitions_path: str):
 
     return None
 
-def check_expected_files(definitions, geotiff_path, folder_path, validation_results):
+def check_expected_files(definitions: dict | None, geotiff_path, folder_path, validation_results):
     expected_files = set()
     for file_structure in definitions["files"]:
         expected_files.add(file_structure["file_name"])
@@ -142,8 +142,8 @@ def validate(geotiff_path, folder_path, required_validations: str, recommended_v
         check_expected_files(definitions, geotiff_path, folder_path, validation_results)
 
     if geotiff_path is not None:
-        success = success and append_validations_for_file(geotiff_path, validation_results, required_validators,
-                                                          recommended_validators, definitions)
+        success = append_validations_for_file(geotiff_path, validation_results, required_validators,
+                                                          recommended_validators, definitions) and success
     else:
         # folder_path must be not None
         dir_list = listdir(folder_path)
@@ -181,7 +181,7 @@ def get_validator_map(definitions: bool):
 
 
 def get_validation_descriptions(legacy):
-    validation_classes = get_validator_classes(true)
+    validation_classes = get_validator_classes(True)
     return OrderedDict(
         (klass.code, klass.__doc__) for klass in validation_classes
     )
