@@ -134,7 +134,6 @@ def geotiff_validator_command(
         recommended_validations_executed=[x.code for x in recommended_validators]
     )
 
-    success = True
     if not success and exit_on_fail:
         sys.exit(1)
 

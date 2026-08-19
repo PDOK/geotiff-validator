@@ -21,7 +21,7 @@ def get_validations_for_validating_process(required_validations: str, recommende
     required_validators = []
     recommended_validators = []
 
-    if required_validations == "" and recommended_validations == "":
+    if required_validations == "" and recommended_validations == "" and not definitions:
         required_validators = get_default_validators(definitions)
     else:
         required_validations_list = []

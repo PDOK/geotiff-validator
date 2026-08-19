@@ -170,3 +170,13 @@ def test_generate_definitions_with_folder():
         ]
     }
     assert json.loads(result.output) == expected
+
+def test_validate_all():
+    runner = CliRunner()
+    result = runner.invoke(cli, ["validate", "--geotiff-path", "tests/data/single_files/test_correct.tif", "--exit-on-fail"])
+    assert result.exit_code == 0
+
+def test_validate_incorrect():
+    runner = CliRunner()
+    result = runner.invoke(cli, ["validate", "--geotiff-path", "tests/data/single_files/test_nocog.tif", "--required-validations", "1", "--exit-on-fail"])
+    assert result.exit_code == 1

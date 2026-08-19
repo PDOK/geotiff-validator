@@ -1,0 +1,89 @@
+{
+  "cog_enabled": false,
+  "cog_block_size_x": null,
+  "cog_block_size_y": null,
+  "compression": null,
+  "crs": 28992,
+  "data_type": "uint8",
+  "interleave": "BAND",
+  "size_x": 10,
+  "size_y": 20,
+  "files": [
+    {
+      "bands": [
+        {
+          "band": 1,
+          "block": [
+            10,
+            20
+          ],
+          "type": "Byte",
+          "colorInterpretation": "Palette",
+          "metadata": {}
+        }
+      ],
+      "cornerCoordinates": {
+        "upperLeft": [
+          -40000.0,
+          725000.0
+        ],
+        "lowerLeft": [
+          -40000.0,
+          724500.0
+        ],
+        "lowerRight": [
+          -39750.0,
+          724500.0
+        ],
+        "upperRight": [
+          -39750.0,
+          725000.0
+        ],
+        "center": [
+          -39875.0,
+          724750.0
+        ]
+      },
+      "file_name": "geotiff_missing.tif",
+      "raster_count": 1
+    },
+    {
+      "bands": [
+        {
+          "band": 1,
+          "block": [
+            10,
+            20
+          ],
+          "type": "Byte",
+          "colorInterpretation": "Palette",
+          "metadata": {}
+        }
+      ],
+      "cornerCoordinates": {
+        "upperLeft": [
+          160000.0,
+          725000.0
+        ],
+        "lowerLeft": [
+          160000.0,
+          724500.0
+        ],
+        "lowerRight": [
+          160250.0,
+          724500.0
+        ],
+        "upperRight": [
+          160250.0,
+          725000.0
+        ],
+        "center": [
+          160125.0,
+          724750.0
+        ]
+      },
+      "file_name": "geotiff_02.tif",
+      "raster_count": 1
+    }
+  ]
+}
