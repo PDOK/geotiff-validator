@@ -8,7 +8,7 @@ import typing
 
 from geotiff_validator.geotiff import geotiff_is_cog, get_geotiff_interleave, get_geotiff_compression, \
     get_geotiff_cog_block_dimensions, get_geotiff_data_type, get_geotiff_dimensions, get_geotiff_crs
-from geotiff_validator.utils import file_has_tiff_extension
+from geotiff_validator.utils import file_has_tiff_extension, open_dataset
 
 from typing import Dict, List
 
@@ -56,11 +56,9 @@ def from_generated_schema(schema: dict) -> SharedTifAttributes:
 
 def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[str]):
     if file is not None:
-        ds = None
-        try:
-            ds = gdal.Open(file)
-        except:
-            print(f"Could not parse header from file '{file}'")
+        ds, error = open_dataset(file)
+        if error is not None:
+            print(f"Could not parse header from file '{file}': {error}")
             sys.exit(1)
         header_info = gdal.Info(ds, format='json', showColorTable=False)
         return from_gdal_info(header_info)
@@ -68,11 +66,9 @@ def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[st
         for file in dir_list:
             if file_has_tiff_extension(file):
                 full_path = folder + "/" + file
-                ds = None
-                try:
-                    ds = gdal.Open(full_path)
-                except:
-                    print(f"Could not parse header from file '{full_path}'")
+                ds, error = open_dataset(full_path)
+                if error is not None:
+                    print(f"Could not parse header from file '{full_path}': {error}")
                     sys.exit(1)
                 header_info = gdal.Info(ds, format='json', showColorTable=False)
                 return from_gdal_info(header_info)
@@ -82,12 +78,11 @@ def get_file_specifics(header_info, file_name: str, dataset):
     return {"bands": header_info["bands"], "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file_name, "raster_count": dataset.RasterCount}
 
 def append_file_structure(filepath: str, file_name: str, file_structures: List[str], shared_attributes: SharedTifAttributes):
-    ds = None
-    try:
-        ds = gdal.Open(filepath)
-    except Exception:
-        print(f"Could not parse header from file '{filepath}'")
+    ds, error = open_dataset(filepath)
+    if error is not None:
+        print(f"Could not parse header from file '{filepath}': {error}")
         sys.exit(1)
+
     header_info = gdal.Info(ds, format='json', showColorTable=False)
     file_attributes = from_gdal_info(header_info)
     if file_attributes != shared_attributes:

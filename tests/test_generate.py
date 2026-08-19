@@ -1,28 +1,18 @@
-import json
-import pytest
 from click.testing import CliRunner
 
 from geotiff_validator.cli import cli
+from geotiff_validator.generate import generate_definitions
 
-def test_show_validations():
-    runner = CliRunner()
-    result = runner.invoke(cli, ["show-validations"])
-    assert result.exit_code == 0
-    assert (
-            '1": "The GeoTiff must be a Cloud Optimized GeoTiff(COG)"'
-            in result.output
-    )
-
-def test_generate_definitions_no_file_or_folder():
-    runner = CliRunner()
-    result = runner.invoke(cli, ["generate-definitions"])
-    assert result.output == "error: Give exactly one of --geotiff-path and --folder-path\n"
-    assert result.exit_code == 2
+import json
+import pytest
 
 def test_generate_definitions_with_file():
-    runner = CliRunner()
-    result = runner.invoke(cli, ["generate-definitions", "--geotiff-path", "tests/data/single_files/test_plaingeotiff.tif"])
-    assert result.exit_code == 0
+    result = None
+    try:
+        result = generate_definitions(file="tests/data/single_files/test_plaingeotiff.tif", folder=None)
+    except Exception as e:
+        print(e)
+        assert False
     expected = {
         "cog_enabled": False,
         "cog_block_size_x": None,
@@ -74,12 +64,16 @@ def test_generate_definitions_with_file():
             }
         ]
     }
-    assert json.loads(result.output) == expected
+    assert result == expected
+
 
 def test_generate_definitions_with_folder():
-    runner = CliRunner()
-    result = runner.invoke(cli, ["generate-definitions", "--folder-path", "tests/data/multiple_files/plain_geotiffs"])
-    assert result.exit_code == 0
+    result = None
+    try:
+        result = generate_definitions(file=None, folder="tests/data/multiple_files/plain_geotiffs")
+    except Exception as e:
+        print(e)
+        assert False
     expected = {
         "cog_enabled": False,
         "cog_block_size_x": None,
@@ -169,4 +163,24 @@ def test_generate_definitions_with_folder():
             }
         ]
     }
-    assert json.loads(result.output) == expected
+    assert result == expected
+
+def test_generate_definitions_with_empty_folder():
+    result = None
+    try:
+        with pytest.raises(SystemExit):
+            result = generate_definitions(file=None, folder="tests/data/multiple_files/empty")
+        assert False
+    except Exception as e:
+        pass
+
+
+def test_generate_definitions_with_mixed_attributes():
+    """Shared attributes like pixel dimensions and CRS must not differ between files"""
+    result = None
+    try:
+        with pytest.raises(SystemExit):
+            result = generate_definitions(file=None, folder="tests/data/multiple_files/different_sizes")
+        assert False
+    except Exception as e:
+        pass

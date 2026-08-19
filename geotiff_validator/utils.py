@@ -1,6 +1,11 @@
-from osgeo import gdal, ogr
+from osgeo import gdal
+from pathlib import Path
 
-def open_dataset(filename: str) -> gdal.Dataset:
+
+def open_dataset(filename: str) -> (gdal.Dataset, Exception):
+    if not Path(filename).is_file():
+        return None, Exception("File does not exist")
+
     dataset = None
     try:
         dataset = gdal.Open(filename)

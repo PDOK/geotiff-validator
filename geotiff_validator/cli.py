@@ -20,6 +20,8 @@ click_log.basic_config(logger)
 def cli():
     pass
 
+
+# noinspection unreachable-code
 @cli.command(
     name="validate",
     help=(
@@ -117,7 +119,7 @@ def geotiff_validator_command(
 
     if (geotiff_path is None and folder_path is None) or (geotiff_path is not None and folder_path is not None):
         logger.error("Give exactly one of --geotiff-path and --folder-path")
-        sys.exit(1)
+        sys.exit(2)
 
     validations, required_validators, recommended_validators, success = validate.validate(geotiff_path, folder_path, required_validations, recommended_validations, definitions_path)
 
@@ -137,6 +139,7 @@ def geotiff_validator_command(
         sys.exit(1)
 
 
+# noinspection unreachable-code
 @cli.command(
     name="generate-definitions",
     help=(
@@ -146,7 +149,7 @@ def geotiff_validator_command(
 @click.option(
     "--folder-path",
     envvar="FOLDER_PATH",
-    required=True,
+    required=False,
     default=None,
     show_envvar=True,
     help="Path pointing to the folder containing the geotiff files",
@@ -178,6 +181,10 @@ def geotiff_generate_definitions_command(
         folder_path: str
 ):
     gdal.UseExceptions()
+
+    if (geotiff_path is None and folder_path is None) or (geotiff_path is not None and folder_path is not None):
+        logger.error("Give exactly one of --geotiff-path and --folder-path")
+        sys.exit(2)
 
     definitions = generate_definitions(geotiff_path, folder_path)
     json_string = json.dumps(definitions, indent=2)
