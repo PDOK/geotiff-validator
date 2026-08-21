@@ -1,3 +1,5 @@
+# To add a new validation: Add it here as an import and add the name to the list "__all__"
+
 from geotiff_validator.validations.validator import Validator
 
 from geotiff_validator.validations.cog_check import CogValidator

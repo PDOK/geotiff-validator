@@ -1,16 +1,20 @@
-from geotiff_validator.generate import SharedTifAttributes, from_gdal_info, from_generated_schema, get_file_specifics
+from geotiff_validator.generate import from_gdal_info, from_generated_schema, get_file_specifics
 from geotiff_validator.validations import validator
 from typing import Iterable
 
-import json
 
 class SchemaValidator(validator.Validator):
+    """The GeoTiff must match the generated schema"""
 
     code = 4
     message = "GeoTiff must conform to generated schema"
 
     def check(self) -> Iterable[str]:
         result = []
+        if self.schema is None:
+            result.append("The schema definition is missing")
+            return result
+
         file_shared_tif_attributes = from_gdal_info(self.dataset_header_info)
         schema_shared_tif_attributes = from_generated_schema(self.schema)
         if file_shared_tif_attributes != schema_shared_tif_attributes:

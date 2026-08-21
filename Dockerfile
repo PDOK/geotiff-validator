@@ -1,7 +1,6 @@
-ARG GDAL_VERSION=3.11.3
+ARG GDAL_VERSION=3.11.5
 
 FROM ghcr.io/osgeo/gdal:alpine-normal-${GDAL_VERSION} AS base
-# docker run ghcr.io/osgeo/gdal:alpine-normal-3.9.1 python3 --version > Python 3.11.9
 
 LABEL maintainer="Roel van den Berg <roel.vandenberg@kadaster.nl>"
 

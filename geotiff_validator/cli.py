@@ -25,7 +25,7 @@ def cli():
 @cli.command(
     name="validate",
     help=(
-            ""
+            "Geotiff validator validating one or more tiff files."
     ),
 )
 @click.option(
@@ -83,8 +83,8 @@ def cli():
     default="",
     envvar="REQUIRED_VALIDATIONS",
     help=(
-            "Comma-separated list of validations to run (e.g. --required-validations 1,2,3). If validations-path and "
-            "validations are not given, validate runs all validations"
+            "Comma-separated list of validations to run (e.g. --required-validations 1,2,3). If validations-path, required-validations and recommended-validations "
+            "are not given, validate runs all validations"
     ),
 )
 @click.option(
@@ -94,8 +94,19 @@ def cli():
     default="",
     envvar="RECOMMENDED_VALIDATIONS",
     help=(
-            "Comma-separated list of validations to run (e.g. --validations RQ1,RQ2,RQ3). If validations-path and "
-            "validations are not given, validate runs all validations"
+            "Comma-separated list of validations to run (e.g. --recommended-validations 1,2,3). If validations-path, required-validations and recommended-validations "
+            "are not given, validate runs all validations"
+    ),
+)
+@click.option(
+    "--validations-path",
+    show_envvar=True,
+    required=False,
+    default="",
+    envvar="VALIDATIONS_PATH",
+    help=(
+            "Path pointing to the set of validations to run. If validations-path, required-validations and recommended-validations are not given, validate "
+            "runs all validations"
     ),
 )
 @click.option(
@@ -109,6 +120,7 @@ def geotiff_validator_command(
         folder_path: str,
         required_validations: str,
         recommended_validations: str,
+        validations_path: str,
         definitions_path: str,
         exit_on_fail: bool
 ):
@@ -121,7 +133,7 @@ def geotiff_validator_command(
         logger.error("Give exactly one of --geotiff-path and --folder-path")
         sys.exit(2)
 
-    validations, required_validators, recommended_validators, success = validate.validate(geotiff_path, folder_path, required_validations, recommended_validations, definitions_path)
+    validations, required_validators, recommended_validators, success = validate.validate(geotiff_path, folder_path, required_validations, recommended_validations, definitions_path, validations_path)
 
     duration_seconds = time.monotonic() - duration_start
 
@@ -142,7 +154,9 @@ def geotiff_validator_command(
 @cli.command(
     name="generate-definitions",
     help=(
-            ""
+            "Generate schema definition for one or multiple tifs . Use the\
+            generated definition JSON or YAML in the validation step by providing the\
+            table definitions with the --definitions-path parameter."
     ),
 )
 @click.option(

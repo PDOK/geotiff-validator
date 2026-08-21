@@ -1,5 +1,4 @@
 from typing import Iterable, List, Dict
-from abc import ABC, abstractmethod
 from osgeo import gdal
 
 def format_result(
@@ -38,7 +37,6 @@ class Validator:
         else:
             return None
 
-    @abstractmethod
     def check(self) -> Iterable[str]:
         """Check the tiff file and return a list of validation results."""
         ...
