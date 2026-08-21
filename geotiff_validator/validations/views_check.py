@@ -14,6 +14,7 @@ class ViewsValidator(validator.Validator):
         for band in bands:
             overviews = band.get("overviews", None)
             if overviews is not None:
-                return [f"GeoTiff has unexpected views present on bands, example: band '{band.get("band")}'"]
+                band_number = band.get("band")
+                return [f"GeoTiff has unexpected views present on bands, example: band '{band_number}'"]
 
         return []
