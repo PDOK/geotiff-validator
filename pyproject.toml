@@ -21,7 +21,7 @@ dependencies = [
     "setuptools>=42.0,!=58.*,!=59.*,!=60.*,!=61.*",
     "Click >= 8.0",
     "click-log >=0.3",
-    "gdal ==3.11.5",
+    "gdal >=3.8",
     "minio",
     "pydantic >= 2.9",
     "pyyaml",

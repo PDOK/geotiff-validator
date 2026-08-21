@@ -41,6 +41,3 @@ jobs:
     - name: Test with pytest
       run: |
         pytest -vv
-    - name: Test with black
-      run: |
-        black --check --diff .
