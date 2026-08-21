@@ -98,7 +98,38 @@ docker run -v ${PWD}:/tiff --rm pdok/geotiff-validator validate --definitions-pa
 ### Validate
 
 ```text
-Geotiff validator validating one or more tiff files.
+Usage: geotiff-validator validate [OPTIONS]
+
+  Geotiff validator validating one or more tiff files.
+
+Options:
+  --geotiff-path FILE             Path pointing to the geotiff .tif file  [env
+                                  var: GEOTIFF_PATH]
+  --folder-path DIRECTORY         Path pointing to a folder containing geotiff
+                                  .tif files  [env var: FOLDER_PATH]
+  --definitions-path FILE         Path pointing to the geotiff-definitions
+                                  JSON or YAML file (generate this file by
+                                  calling the generate-definitions command)
+  --required-validations TEXT     Comma-separated list of validations to run
+                                  (e.g. --required-validations 1,2,3). If
+                                  validations-path, required-validations and
+                                  recommended-validations are not given,
+                                  validate runs all validations  [env var:
+                                  REQUIRED_VALIDATIONS]
+  --recommended-validations TEXT  Comma-separated list of validations to run
+                                  (e.g. --recommended-validations 1,2,3). If
+                                  validations-path, required-validations and
+                                  recommended-validations are not given,
+                                  validate runs all validations  [env var:
+                                  RECOMMENDED_VALIDATIONS]
+  --validations-path TEXT         Path pointing to the set of validations to
+                                  run. If validations-path, required-
+                                  validations and recommended-validations are
+                                  not given, validate runs all validations
+                                  [env var: VALIDATIONS_PATH]
+  --exit-on-fail                  Exit with code 1 when validation success is
+                                  false.
+  --help                          Show this message and exit.
 ```
 
 ### Schema validation
