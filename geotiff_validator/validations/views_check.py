@@ -6,6 +6,7 @@ class ViewsValidator(validator.Validator):
 
     code = 3
     message = "GeoTiff has views"
+    all_files = False
 
     def check(self) -> Iterable[str]:
         bands = self.dataset_header_info.get("bands", None)

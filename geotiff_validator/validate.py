@@ -5,17 +5,18 @@ import yaml
 
 from os import listdir
 
+import geotiff_validator
 from geotiff_validator import utils
 
 from osgeo import gdal
 from geotiff_validator import validations as validation
 from geotiff_validator import validations
 from geotiff_validator.validations.schema_check import SchemaValidator
-from geotiff_validator.validations.validator import format_result
+from geotiff_validator.validations.validator import format_result, Validator
 
 from typing import List
 
-def get_validators(required_validations_ints: list[int], recommended_validations_ints: list[int], definitions: bool) -> (list, list):
+def get_validators(required_validations_ints: list[int], recommended_validations_ints: list[int], definitions: bool) -> (list[Validator], list[Validator]):
     required_validators = []
     recommended_validators = []
 
@@ -43,7 +44,7 @@ def get_validators(required_validations_ints: list[int], recommended_validations
 
     return required_validators, recommended_validators
 
-def get_validations_from_validations_path(validations_path: str, definitions: bool) -> (list, list):
+def get_validations_from_validations_path(validations_path: str, definitions: bool) -> (list[Validator], list[Validator]):
     data = None
     if validations_path.endswith(".yaml"):
         with open(validations_path, "r") as file:
@@ -97,13 +98,13 @@ def append_validations_for_file(file_path: str, validation_results, required_val
 
     dataset_header_info = gdal.Info(dataset, format='json', showColorTable=False)
     for validator in required_validators:
-        result = validator(file_name, dataset, dataset_header_info, definitions).validate()
+        result = validator(file_name, None, dataset, dataset_header_info, definitions).validate()
         if result is not None:
             result["level"] = "error"
             success = False
             validation_results.append(result)
     for validator in recommended_validators:
-        result = validator(file_name, dataset, dataset_header_info, definitions).validate()
+        result = validator(file_name, None, dataset, dataset_header_info, definitions).validate()
         if result is not None:
             result["level"] = "recommendation"
             validation_results.append(result)

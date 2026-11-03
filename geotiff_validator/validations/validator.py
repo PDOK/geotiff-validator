@@ -3,7 +3,7 @@ from osgeo import gdal
 
 def format_result(
         filename: str,
-        validation_code: str,
+        validation_code: int,
         validation_description: str,
         trace: List[str],
 ):
@@ -17,14 +17,16 @@ def format_result(
 class Validator:
     code: int
     message: str
+    multi_file: bool
 
-    def __init__(self, filename:str, dataset, dataset_header_info, schema, **kwargs):
+    def __init__(self, filename:str | None, all_files: list[str] | None, dataset, dataset_header_info, schema, **kwargs):
         self.filename = filename
+        self.all_files = all_files
         self.dataset: gdal.Dataset = dataset
         self.dataset_header_info = dataset_header_info
         self.schema = schema
 
-    def validate(self) -> Dict[str, List[str]] | None:
+    def validate(self) -> Dict[str, object] | None:
         """Run validation on geotiff."""
         results = list(self.check())
         if results:
