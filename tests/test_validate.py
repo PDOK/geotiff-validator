@@ -70,3 +70,17 @@ def test_validate_with_schema():
     assert not success
     assert len(required_validators) == 1
     assert required_validators[0].code == 1
+
+def test_shared_attributes_equal():
+    validations, required_validators, recommended_validators, success = validate(geotiff_path=None, folder_path="tests/data/multiple_files/plain_geotiffs", required_validations="5", recommended_validations="", definitions_path="", validations_path="")
+    assert len(validations) == 0
+    assert len(required_validators) == 1
+    assert len(recommended_validators) == 0
+    assert success
+
+def test_shared_attributes_equal_invalid():
+    validations, required_validators, recommended_validators, success = validate(geotiff_path=None, folder_path="tests/data/multiple_files/different_sizes", required_validations="5", recommended_validations="", definitions_path="", validations_path="")
+    assert len(validations) == 1
+    assert len(required_validators) == 1
+    assert len(recommended_validators) == 0
+    assert not success

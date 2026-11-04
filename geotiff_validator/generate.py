@@ -40,6 +40,19 @@ class SharedTifAttributes:
                 and self.size_y == other.size_y and self.crs == other.crs and self.data_type == other.data_type
                 and self.cog_block_size_x == other.cog_block_size_x and self.cog_block_size_y == other.cog_block_size_y)
 
+    def diff_string(self, other):
+        differences = []
+
+        for key in vars(self):
+            value1 = getattr(self, key)
+            value2 = getattr(other, key)
+
+            if value1 != value2:
+                differences.append(
+                    f"{key}: {value1!r} != {value2!r}"
+                )
+        return "\n".join(differences)
+
 def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
     dimensions = get_geotiff_dimensions(gdal_info)
     interleave = get_geotiff_interleave(gdal_info)
@@ -54,7 +67,7 @@ def from_gdal_info(gdal_info: dict) -> SharedTifAttributes:
 def from_generated_schema(schema: dict) -> SharedTifAttributes:
     return SharedTifAttributes(schema["cog_enabled"], schema["compression"], schema["interleave"], schema["size_x"], schema["size_y"], schema["crs"], schema["data_type"], schema["cog_block_size_x"], schema["cog_block_size_y"])
 
-def get_shared_attributes(file:str | None, folder: str, dir_list: typing.List[str]):
+def get_shared_attributes(file:str | None, folder: str | None, dir_list: typing.List[str] | None) -> SharedTifAttributes | None:
     if file is not None:
         ds, error = open_dataset(file)
         if error is not None:

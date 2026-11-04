@@ -8,6 +8,7 @@ class SchemaValidator(validator.Validator):
 
     code = 4
     message = "GeoTiff must conform to generated schema"
+    all_files = False
 
     def check(self) -> Iterable[str]:
         result = []

@@ -8,6 +8,7 @@ class CogValidator(validator.Validator):
 
     code = 1
     message = "Geotiff is not a Cloud Optimized GeoTIFF(COG)"
+    all_files = False
 
     def check(self) -> Iterable[str]:
         is_cog = geotiff_is_cog(self.dataset_header_info)

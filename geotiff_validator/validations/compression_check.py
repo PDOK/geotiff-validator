@@ -8,6 +8,7 @@ class CompressionValidator(validator.Validator):
 
     code = 2
     message = "Geotiff is not compressed with LZW"
+    all_files = False
 
     def check(self) -> Iterable[str]:
         compression = get_geotiff_compression(self.dataset_header_info)
