@@ -7,8 +7,11 @@ from geotiff_validator.validations.compression_check import CompressionValidator
 
 from geotiff_validator.validations.views_check import ViewsValidator
 
+from geotiff_validator.validations.consistency_check import ConsistencyValidator
+
 __all__ = [
     "CogValidator",
     "CompressionValidator",
-    "ViewsValidator"
+    "ViewsValidator",
+    "ConsistencyValidator"
 ]

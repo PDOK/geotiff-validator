@@ -81,7 +81,7 @@ def get_validations_for_validating_process(required_validations: str, recommende
     return required_validators, recommended_validators
 
 
-def append_validations_for_file(file_path: str, validation_results, required_validators: List[validations.Validator], recommended_validators: List[validations.Validator],
+def append_validations_for_file(file_path: str, validation_results: list, required_validators: List[validations.Validator], recommended_validators: List[validations.Validator],
                                 definitions: dict | None):
     success = True
     file_name = file_path.rsplit("/", 1)[-1]
@@ -109,6 +109,27 @@ def append_validations_for_file(file_path: str, validation_results, required_val
             result["level"] = "recommendation"
             validation_results.append(result)
     return success
+
+def append_validations_for_all_files(files: list[str], validation_results: list, required_validators: List[validations.Validator], recommended_validators: List[validations.Validator], definitions: dict | None):
+    success = True
+    for validator in required_validators:
+        if not validator.all_files:
+            continue
+        result = validator(None, files, None, None, None).validate()
+        if result is not None:
+            result["level"] = "error"
+            success = False
+            validation_results.append(result)
+    for validator in recommended_validators:
+        if not validator.all_files:
+            continue
+        result = validator(None, files, None, None, None).validate()
+        if result is not None:
+            result["level"] = "recommendation"
+            validation_results.append(result)
+
+    return success
+
 
 
 def get_definitions(definitions_path: str):
@@ -148,6 +169,17 @@ def check_expected_files(definitions: dict | None, geotiff_path, folder_path, va
 
     return
 
+def get_full_file_paths(folder_path: str, dir_list: list[str]):
+    result = []
+    base_path = folder_path
+    if not base_path.endswith("/"):
+        base_path += "/"
+    for file in dir_list:
+        if file.endswith(".tif") or file.endswith(".tiff"):
+            result.append(base_path+file)
+    return result
+
+
 def validate(geotiff_path, folder_path, required_validations: str, recommended_validations: str, definitions_path: str, validations_path):
     success = True
 
@@ -182,9 +214,11 @@ def validate(geotiff_path, folder_path, required_validations: str, recommended_v
                 if not file_path.endswith("/"):
                     file_path += "/"
                 file_path += filename
-                file_success = append_validations_for_file(file_path, validation_results, required_validators,
-                                                           recommended_validators, definitions)
-                success = success and file_success
+                success = append_validations_for_file(file_path, validation_results, required_validators,
+                                                      recommended_validators, definitions) and success
+        # Checks for all files are only relevant if there is possibly more than one file
+        success = append_validations_for_all_files(get_full_file_paths(folder_path, dir_list), validation_results, required_validators, recommended_validators, definitions) and success
+
 
     return validation_results, required_validators, recommended_validators, success
 

@@ -15,14 +15,14 @@ def format_result(
     }
 
 class Validator:
-    code: int
-    message: str
-    multi_file: bool
+    code: int # The code number for each validator, unique per validator
+    message: str # The description of what the validator does
+    all_files: bool # True if the Validator is for checking all the files simultaneously, False for checking the files separately
 
-    def __init__(self, filename:str | None, all_files: list[str] | None, dataset, dataset_header_info, schema, **kwargs):
+    def __init__(self, filename:str | None, file_list: list[str] | None, dataset: gdal.Dataset | None, dataset_header_info, schema, **kwargs):
         self.filename = filename
-        self.all_files = all_files
-        self.dataset: gdal.Dataset = dataset
+        self.file_list = file_list
+        self.dataset: gdal.Dataset | None = dataset
         self.dataset_header_info = dataset_header_info
         self.schema = schema
 
@@ -31,7 +31,7 @@ class Validator:
         results = list(self.check())
         if results:
             return format_result(
-                filename=self.filename,
+                filename=self.filename or "-",
                 validation_code=self.code,
                 validation_description=self.__doc__,
                 trace=results,
