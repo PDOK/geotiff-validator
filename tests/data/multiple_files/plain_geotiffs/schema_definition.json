@@ -18,8 +18,7 @@
             20
           ],
           "type": "Byte",
-          "colorInterpretation": "Palette",
-          "metadata": {}
+          "colorInterpretation": "Palette"
         }
       ],
       "cornerCoordinates": {
@@ -56,8 +55,7 @@
             20
           ],
           "type": "Byte",
-          "colorInterpretation": "Palette",
-          "metadata": {}
+          "colorInterpretation": "Palette"
         }
       ],
       "cornerCoordinates": {
