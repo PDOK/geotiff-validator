@@ -33,8 +33,7 @@ def test_generate_definitions_with_file():
                             20
                         ],
                         "type": "Byte",
-                        "colorInterpretation": "Palette",
-                        "metadata": {}
+                        "colorInterpretation": "Palette"
                     }
                 ],
                 "cornerCoordinates": {
@@ -95,7 +94,6 @@ def test_generate_definitions_with_folder():
                         ],
                         "type": "Byte",
                         "colorInterpretation": "Palette",
-                        "metadata": {}
                     }
                 ],
                 "cornerCoordinates": {
@@ -133,7 +131,6 @@ def test_generate_definitions_with_folder():
                         ],
                         "type": "Byte",
                         "colorInterpretation": "Palette",
-                        "metadata": {}
                     }
                 ],
                 "cornerCoordinates": {

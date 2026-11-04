@@ -87,8 +87,17 @@ def get_shared_attributes(file:str | None, folder: str | None, dir_list: typing.
                 return from_gdal_info(header_info)
     return None
 
+def process_bands(original_bands: list[dict]) -> list[dict]:
+    result = []
+    for band in original_bands:
+        # Static list to prevent wildgrowth of possible fields entered by different software packages
+        extracted_keys = ["band", "block", "type", "colorInterpretation", "overviews"]
+        new_band = {k: band[k] for k in extracted_keys if k in band}
+        result.append(new_band)
+    return result
+
 def get_file_specifics(header_info, file_name: str, dataset):
-    return {"bands": header_info["bands"], "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file_name, "raster_count": dataset.RasterCount}
+    return {"bands": process_bands(header_info["bands"]), "cornerCoordinates": header_info["cornerCoordinates"], "file_name": file_name, "raster_count": dataset.RasterCount}
 
 def append_file_structure(filepath: str, file_name: str, file_structures: List[str], shared_attributes: SharedTifAttributes):
     ds, error = open_dataset(filepath)
