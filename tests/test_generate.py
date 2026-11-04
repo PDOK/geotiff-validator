@@ -95,7 +95,6 @@ def test_generate_definitions_with_folder():
                         ],
                         "type": "Byte",
                         "colorInterpretation": "Palette",
-                        "metadata": {}
                     }
                 ],
                 "cornerCoordinates": {
@@ -133,7 +132,6 @@ def test_generate_definitions_with_folder():
                         ],
                         "type": "Byte",
                         "colorInterpretation": "Palette",
-                        "metadata": {}
                     }
                 ],
                 "cornerCoordinates": {
